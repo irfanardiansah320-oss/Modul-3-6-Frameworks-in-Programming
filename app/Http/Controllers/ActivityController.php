@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Activity;
-use App\Services\ActivityService;
 use App\Http\Requests\StoreActivityRequest;
 use App\Http\Requests\UpdateActivityRequest;
+use App\Models\Activity;
+use App\Services\ActivityService;
 use DomainException;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ActivityController extends Controller
 {
@@ -65,7 +65,7 @@ class ActivityController extends Controller
             ->with('success', 'Data diperbarui.');
     }
 
-        public function destroy(Activity $activity): RedirectResponse
+    public function destroy(Activity $activity): RedirectResponse
     {
         $activity->delete();
 

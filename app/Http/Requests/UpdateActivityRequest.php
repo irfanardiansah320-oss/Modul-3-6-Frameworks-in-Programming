@@ -16,9 +16,9 @@ class UpdateActivityRequest extends FormRequest
     {
         return [
             'title' => ['required', 'min:5', 'max:100'],
-            'description' => ['nullable', 'string', 'max:1000'],   
-            'activity_date' => ['required', 'date'],               
-            'category' => ['required', 'string', 'max:50'],        
+            'description' => ['nullable', 'string', 'max:1000'],
+            'activity_date' => ['required', 'date'],
+            'category' => ['required', 'string', 'max:50'],
             'status' => ['required', Rule::in(['Planned', 'Ongoing', 'Done'])],
         ];
     }

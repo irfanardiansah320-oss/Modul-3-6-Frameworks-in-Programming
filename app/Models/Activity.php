@@ -15,7 +15,6 @@ class Activity extends Model
     ];
 
     protected function casts(): array
-
     {
         return [
             'activity_date' => 'date',
