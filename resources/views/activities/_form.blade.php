@@ -1,3 +1,10 @@
+{{-- 1. Input Kode Kegiatan (Baru) --}}
+<label for="code">Kode Kegiatan</label>
+<input id="code" name="code" value="{{ old('code', $activity->code ?? '') }}">
+@error('code')
+    <p class="error">{{ $message }}</p>
+@enderror
+
 <label for="title">Judul</label>
 <input id="title" name="title" value="{{ old('title', $activity->title ?? '') }}">
 @error('title')
@@ -17,9 +24,18 @@
     <p class="error">{{ $message }}</p>
 @enderror
 
-<label for="category">Kategori</label>
-<input id="category" name="category" value="{{ old('category', $activity->category ?? '') }}">
-@error('category')
+{{-- 2. Dropdown Kategori (Menggantikan input teks category lama) --}}
+<label for="category_id">Kategori</label>
+<select id="category_id" name="category_id" required>
+    <option value="">-- Pilih kategori --</option>
+    @foreach ($categories as $category)
+        <option value="{{ $category->id }}"
+            @selected(old('category_id', $activity->category_id ?? null) == $category->id)>
+            {{ $category->name }}
+        </option>
+    @endforeach
+</select>
+@error('category_id')
     <p class="error">{{ $message }}</p>
 @enderror
 

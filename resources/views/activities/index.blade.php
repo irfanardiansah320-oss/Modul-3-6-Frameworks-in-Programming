@@ -11,6 +11,7 @@
                     {{ $activity->title }}
                 </a>
             </h2>
+            <p>Kategori: {{ $activity->category?->name ?? '-' }}</p> {{-- Ditambahkan di sini --}}
             <p>{{ $activity->activity_date->format('d M Y') }}</p>
             <p>Status: {{ $activity->status }}</p>
         </article>

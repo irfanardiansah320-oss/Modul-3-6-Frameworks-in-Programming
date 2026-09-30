@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
-    protected $fillable = [
-        'name',
-        'slug',
-    ];
+    protected $fillable = ['name', 'slug'];
 
-    public function activities()
+    public function activities(): HasMany
     {
         return $this->hasMany(Activity::class);
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('name');
     }
 }
