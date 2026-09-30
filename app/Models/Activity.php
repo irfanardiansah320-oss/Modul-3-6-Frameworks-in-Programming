@@ -27,4 +27,30 @@ class Activity extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    // Tambahkan method scopeFilter di bawah ini
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($q, $search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('title', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            });
+        });
+
+        $query->when($filters['category_id'] ?? null, function ($q, $categoryId) {
+            $q->where('category_id', $categoryId);
+        });
+
+        $query->when($filters['status'] ?? null, function ($q, $status) {
+            $q->where('status', $status);
+        });
+
+        $sort = $filters['sort'] ?? 'latest';
+        if ($sort === 'oldest') {
+            $query->oldest('activity_date');
+        } else {
+            $query->latest('activity_date');
+        }
+    }
 }

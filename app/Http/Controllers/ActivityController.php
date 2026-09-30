@@ -7,13 +7,13 @@ use App\Http\Requests\UpdateActivityRequest;
 use App\Models\Activity;
 use App\Models\Category; 
 use App\Services\ActivityService;
-use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ActivityController extends Controller
 {
-    
+    public function __construct(private ActivityService $activityService) {}
+
     private function categoryOptions()
     {
         return Category::ordered()->get();
@@ -21,18 +21,14 @@ class ActivityController extends Controller
 
     public function index(): View
     {
-        $status = request('status');
-        $validStatuses = ['Planned', 'Ongoing', 'Done'];
+        $activities = Activity::with('category') // Eager loading untuk cegah N+1
+            ->filter(request(['search', 'category_id', 'status', 'sort']))
+            ->paginate(10)
+            ->withQueryString(); // Mempertahankan parameter URL saat pindah halaman
 
-        $activities = Activity::query()
-            ->when(
-                in_array($status, $validStatuses, true),
-                fn ($query) => $query->where('status', $status)
-            )
-            ->orderBy('activity_date')
-            ->get();
+        $categories = $this->categoryOptions();
 
-        return view('activities.index', compact('activities', 'status'));
+        return view('activities.index', compact('activities', 'categories'));
     }
 
     public function create(): View
@@ -42,9 +38,9 @@ class ActivityController extends Controller
         ]);
     }
 
-    public function store(StoreActivityRequest $request, ActivityService $service): RedirectResponse
+    public function store(StoreActivityRequest $request): RedirectResponse
     {
-        $activity = $service->create($request->validated());
+        $activity = $this->activityService->create($request->validated());
 
         return redirect('/activities/'.$activity->id)
             ->with('success', 'Kegiatan berhasil dibuat.');
@@ -63,18 +59,26 @@ class ActivityController extends Controller
         ]);
     }
 
-    public function update(UpdateActivityRequest $request, Activity $activity, ActivityService $service): RedirectResponse
+    public function update(UpdateActivityRequest $request, Activity $activity): RedirectResponse
     {
-        try {
-            $service->update($activity, $request->validated());
-        } catch (DomainException $exception) {
-            return back()
-                ->withErrors(['status' => $exception->getMessage()])
-                ->withInput();
-        }
+        $this->activityService->update($activity, $request->validated());
 
         return redirect('/activities/'.$activity->id)
             ->with('success', 'Data diperbarui.');
+    }
+
+    public function publish(Activity $activity): RedirectResponse
+    {
+        $this->activityService->publish($activity);
+
+        return back()->with('success', "Kegiatan '{$activity->title}' berhasil dipublikasikan.");
+    }
+
+    public function complete(Activity $activity): RedirectResponse
+    {
+        $this->activityService->complete($activity);
+
+        return back()->with('success', "Kegiatan '{$activity->title}' telah selesai.");
     }
 
     public function destroy(Activity $activity): RedirectResponse
