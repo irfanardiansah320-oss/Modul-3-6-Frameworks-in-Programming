@@ -8,6 +8,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/trash/activities', [ActivityController::class, 'trash'])->name('activities.trash');
+Route::patch('/trash/activities/{activity}/restore', [ActivityController::class, 'restore'])
+    ->withTrashed()
+    ->name('activities.restore');
+
 Route::resource('activities', ActivityController::class);
 Route::resource('categories', CategoryController::class)->only(['index', 'destroy']);
 Route::patch('activities/{activity}/publish', [ActivityController::class, 'publish'])->name('activities.publish');

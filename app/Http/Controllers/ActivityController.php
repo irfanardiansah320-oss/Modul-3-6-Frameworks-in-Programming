@@ -86,6 +86,25 @@ class ActivityController extends Controller
         $activity->delete();
 
         return redirect('/activities')
-            ->with('success', 'Kegiatan berhasil dihapus.');
+            ->with('success', 'Kegiatan berhasil dipindahkan ke sampah.');
+    }
+
+    // TAMBAHKAN 2 METHOD INI DI BAGIAN BAWAH:
+    public function trash(): View
+    {
+        $activities = Activity::onlyTrashed()
+            ->with('category')
+            ->latest('deleted_at')
+            ->paginate(10);
+
+        return view('activities.trash', compact('activities'));
+    }
+
+    public function restore(Activity $activity): RedirectResponse
+    {
+        $activity->restore();
+
+        return redirect()->route('activities.index')
+            ->with('success', "Kegiatan '{$activity->title}' berhasil dipulihkan.");
     }
 }
