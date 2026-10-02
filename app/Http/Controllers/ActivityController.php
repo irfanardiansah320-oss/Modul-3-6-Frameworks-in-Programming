@@ -5,14 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreActivityRequest;
 use App\Http\Requests\UpdateActivityRequest;
 use App\Models\Activity;
-use App\Models\Category; 
+use App\Models\Category;
 use App\Services\ActivityService;
+use App\Services\PosterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ActivityController extends Controller
 {
-    public function __construct(private ActivityService $activityService) {}
+    public function __construct(
+        private ActivityService $activityService,
+        private PosterService $posters,
+    ) {}
 
     private function categoryOptions()
     {
@@ -40,7 +44,14 @@ class ActivityController extends Controller
 
     public function store(StoreActivityRequest $request): RedirectResponse
     {
-        $activity = $this->activityService->create($request->validated());
+        $data = $request->validated();
+        unset($data['poster']);
+
+        if ($request->hasFile('poster')) {
+            $data['poster_path'] = $this->posters->store($request->file('poster'));
+        }
+
+        $activity = $this->activityService->create($data);
 
         return redirect('/activities/'.$activity->id)
             ->with('success', 'Kegiatan berhasil dibuat.');
@@ -61,7 +72,22 @@ class ActivityController extends Controller
 
     public function update(UpdateActivityRequest $request, Activity $activity): RedirectResponse
     {
-        $this->activityService->update($activity, $request->validated());
+        $data = $request->validated();
+        unset($data['poster']);
+
+        $oldPoster = $activity->poster_path;
+        $hasNewPoster = $request->hasFile('poster');
+
+        if ($hasNewPoster) {
+            $data['poster_path'] = $this->posters->store($request->file('poster'));
+        }
+
+        $this->activityService->update($activity, $data);
+
+        // File lama dihapus setelah file baru tersimpan dan database diperbarui
+        if ($hasNewPoster) {
+            $this->posters->delete($oldPoster);
+        }
 
         return redirect('/activities/'.$activity->id)
             ->with('success', 'Data diperbarui.');
@@ -83,13 +109,12 @@ class ActivityController extends Controller
 
     public function destroy(Activity $activity): RedirectResponse
     {
-        $activity->delete();
+        $activity->delete(); // soft delete, file poster sengaja tidak dihapus
 
         return redirect('/activities')
             ->with('success', 'Kegiatan berhasil dipindahkan ke sampah.');
     }
 
-    // TAMBAHKAN 2 METHOD INI DI BAGIAN BAWAH:
     public function trash(): View
     {
         $activities = Activity::onlyTrashed()

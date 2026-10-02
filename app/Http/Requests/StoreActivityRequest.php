@@ -24,6 +24,7 @@ class StoreActivityRequest extends FormRequest
                 'required',
                 Rule::in(['Planned', 'Ongoing', 'Done']),
             ],
+            'poster'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // baris baru
         ];
     }
 
@@ -33,6 +34,10 @@ class StoreActivityRequest extends FormRequest
             'category_id.required' => 'Kategori wajib dipilih.',
             'category_id.exists'   => 'Kategori yang dipilih tidak tersedia.',
             'code.unique'          => 'Kode kegiatan sudah dipakai kegiatan lain.',
+            'poster.image'         => 'Poster harus berupa gambar.',
+            'poster.mimes'         => 'Poster harus berformat JPG, PNG, atau WEBP.',
+            'poster.max'           => 'Ukuran poster maksimal 2 MB.',
+            'poster.uploaded'      => 'Poster gagal diunggah. Ukuran maksimal 2 MB.',
         ];
     }
 }

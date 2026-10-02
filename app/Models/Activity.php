@@ -17,6 +17,9 @@ class Activity extends Model
         'description',
         'activity_date',
         'status',
+        'capacity',
+        'registered_count',
+        'poster_path', // <-- TAMBAHAN 1
     ];
 
     protected function casts(): array
@@ -29,6 +32,17 @@ class Activity extends Model
     public function category(): BelongsTo 
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    // <-- TAMBAHAN 2
+    public function getPosterUrlAttribute(): ?string
+    {
+        return $this->poster_path ? asset('storage/' . $this->poster_path) : null;
     }
 
     // Tambahkan method scopeFilter di bawah ini
@@ -56,4 +70,4 @@ class Activity extends Model
             $query->latest('activity_date');
         }
     }
-}
+} 
