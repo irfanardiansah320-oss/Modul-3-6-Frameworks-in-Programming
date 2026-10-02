@@ -17,7 +17,11 @@
         </div>
     @endif
 
-    <table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+    <style>
+        table th, table td { padding: 8px; }
+    </style>
+
+    <table border="1" style="border-collapse: collapse; width: 100%;">
         <thead>
             <tr>
                 <th>Nama</th>
